@@ -29,6 +29,34 @@ def normalize_instrumentation(value: Any) -> List[str]:
     return sorted(set(instruments))
 
 
+def alphabetize_instrumentation(value: Any) -> List[str]:
+    """Return an alphabetized list of instrumentation tokens.
+
+    Accepts a list or a string. Normalizes whitespace and lowercases items
+    before sorting. Returns a list of unique, sorted instruments.
+    """
+    if not value:
+        return []
+
+    if isinstance(value, str):
+        tokens = [t.strip() for t in re.split(r",|;|\\|/", value) if t.strip()]
+    else:
+        tokens = list(value)
+
+    cleaned = []
+    for t in tokens:
+        if not t:
+            continue
+        t2 = t.lower().strip()
+        t2 = t2.replace("solo", "").strip()
+        if t2:
+            cleaned.append(t2)
+
+    # deduplicate while preserving alphabetical order
+    unique = sorted(set(cleaned), key=lambda s: s.lower())
+    return unique
+
+
 LOWERCASE_FIELDS = {
     "Instrumentation",
     "Piece Style",
@@ -77,6 +105,8 @@ def normalize_row(row: Dict[str, Any]) -> Dict[str, Any]:
 
     row["Year"] = normalize_year(row.get("Year/Date of Composition"))
     row["Instrumentation"] = normalize_instrumentation(row.get("Instrumentation"))
+    # ensure instrumentation tokens are alphabetized
+    row["Instrumentation"] = alphabetize_instrumentation(row["Instrumentation"])
     row["Average Duration"] = normalize_duration(row.get("Average Duration"))
 
     row = normalize_case(row)
