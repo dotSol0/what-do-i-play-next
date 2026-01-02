@@ -45,6 +45,68 @@ def scrape_imslp_metadata(url):
 
     return data
 
+import re
+from bs4 import BeautifulSoup
+import requests
+
+STAR_MAP = {
+    "zero-stars": 0,
+    "one-star": 1,
+    "two-stars": 2,
+    "three-stars": 3,
+    "four-stars": 4,
+    "five-stars": 5,
+}
+
+import re
+from bs4 import BeautifulSoup
+import requests
+
+def scrape_score_blocks(imslp_url):
+    # Added a User-Agent to look like a real browser (IMSLP blocks default python requests sometimes)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    response = requests.get(imslp_url, headers=headers, timeout=10)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    results = 0
+
+    blocks = soup.select("div.we_file_download.plainlinks")
+    
+    # DEBUG: Print how many blocks found to ensure basic selection works
+    print(f"Found {len(blocks)} blocks.")
+
+    for block in blocks:
+        
+        # ... inside the loop
+        
+        # Stop after one block to inspect
+
+        
+
+        # ⬇️ DOWNLOADS (Your existing code was mostly fine, just added safety)
+        downloads_span = block.select_one("span[title^='Total number of downloads']")
+        if downloads_span and ":" in downloads_span.get("title", ""):
+            try:
+                results = results + int(downloads_span["title"].split(":")[1].strip())
+            except ValueError:
+                pass
+
+        
+        
+    return results
+# ------------------ TEST ------------------
+
+if __name__ == "__main__":
+    url = "https://imslp.org/wiki/Romeo_and_Juliet_(overture-fantasia),_TH_42_(Tchaikovsky,_Pyotr)"
+    scores = scrape_score_blocks(url)
+    print(scores)
+    
+
+
 #test
-row = scrape_imslp_metadata('https://imslp.org/wiki/Amicizia_(Stankovych,_Tatiana)')
-print(row)
+if __name__ == "__main__":
+    row = scrape_imslp_metadata('https://imslp.org/wiki/Amicizia_(Stankovych,_Tatiana)')
+    print(row)
