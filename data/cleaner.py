@@ -1,6 +1,7 @@
 import re
 import csv
 from typing import Optional, List, Dict, Any
+import itertools
 
 
 def normalize_year(value: Optional[str]) -> Optional[int]:
