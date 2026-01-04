@@ -77,7 +77,7 @@ def main():
         with open(output_filename, 'r', encoding='utf-8') as f:
             rows_done = sum(1 for _ in f) - 1 # Subtract header
         if rows_done > 0:
-            print(f"🔄 Found existing file with {rows_done} rows. Resuming...")
+            print(f"Found existing file with {rows_done} rows. Resuming...")
             mode = 'a' # Append mode
             write_header = False
 
@@ -93,10 +93,10 @@ def main():
         rows_to_process = all_rows[rows_done:]
 
     if not rows_to_process:
-        print("✅ All rows are already processed!")
+        print(" All rows are already processed!")
         return
 
-    print(f"🚀 Starting scrape for {len(rows_to_process)} remaining rows...")
+    print(f" Starting scrape for {len(rows_to_process)} remaining rows...")
 
     # 3. Open Output File and Process
     # We open the file ONCE and keep it open to append lines as they finish

@@ -25,14 +25,14 @@ def scrape_imslp_metadata(url):
         if not th or not td:
             continue
 
-        # 🔑 STRATEGY 1: Look for the specific 'Main Header' class (mh555)
+        #  STRATEGY 1: Look for the specific 'Main Header' class (mh555)
         # This ensures we get "Average Duration" and ignore "Avg. Duration"
         main_label = th.find("span", class_="mh555")
         
         if main_label:
             key = main_label.get_text(strip=True)
         else:
-            # 🔑 STRATEGY 2: Fallback for rows without spans (e.g., "Instrumentation")
+            # STRATEGY 2: Fallback for rows without spans (e.g., "Instrumentation")
             # We use stripped_strings to handle any bold/italic tags inside the header
             key = " ".join(th.stripped_strings).strip()
 
