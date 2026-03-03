@@ -1,7 +1,12 @@
 name: Run IMSLP API and produce CSV
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force_cache_reset:
+        description: 'Set to true to force internal cache reset/load'
+        required: false
+        default: 'false'
   schedule:
     - cron: '0 4 * * 0' # weekly on Sundays at 04:00 UTC
 
@@ -34,8 +39,10 @@ jobs:
         env:
           COUNT: 156000
           OUTPUT_PATH: data/processed_156k.csv
+          FORCE_RESET: ${{ github.event.inputs.force_cache_reset || 'false' }}
         run: |
-          python3 scripts/run_api_call.py --count ${COUNT} --output ${OUTPUT_PATH}
+          python3 scripts/run_api_call.py --count ${COUNT} --output ${OUTPUT_PATH} \
+            $([ "${FORCE_RESET}" = "true" ] && echo "--force-cache-reset")
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
