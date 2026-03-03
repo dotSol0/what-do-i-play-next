@@ -37,8 +37,8 @@ jobs:
 
       - name: Run IMSLP fetch script
         env:
-          START: 38047
-          COUNT: 15000
+          START: 53047
+          COUNT: 16000
           OUTPUT_PATH: data/processed_156k.csv
           FORCE_RESET: ${{ github.event.inputs.force_cache_reset || 'false' }}
         run: |
