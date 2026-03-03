@@ -4,9 +4,9 @@ import sys
 sys.path.append("..")  # or project root
 
 from scraper import scrape_imslp_metadata
-
-
 from imslp.interfaces import internal
+from adding_downloads import process_downloads
+
 
 works = internal.list_works(count=10)
 
@@ -40,7 +40,13 @@ def file_scrape(work):
         row["Year/Date of Composition"] = None
         row["Composer Time Period"] = None
         row["Average Duration"] = None
+
+    try: 
+        row = process_downloads(row)
+    except Exception as e:
+        row["num_downloads"] = 0
     return row
+
 
 
 i = 0

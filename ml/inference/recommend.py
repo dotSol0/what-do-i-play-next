@@ -26,8 +26,9 @@ def instrumentation_query(instrument, df):
             return False
         parts = [p.strip().lower() for p in instr_string.split(",")]
         for inst in instruments:
-            if inst in parts:
-                return True
+            for part in parts:
+                if part == inst:
+                    return True
         return False
 
     return df[df["Instrumentation"].apply(match)]

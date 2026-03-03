@@ -45,7 +45,7 @@ def scrape_score_blocks(imslp_url):
 # 2. THE RESUMABLE CSV LOGIC
 # ==========================================
 
-def process_row(row):
+def process_downloads(row):
     """Worker function for threading"""
     try:
         url = row.get('Permlink', '')
@@ -107,7 +107,7 @@ def main():
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
             # Submit tasks
-            future_to_row = {executor.submit(process_row, row): row for row in rows_to_process}
+            future_to_row = {executor.submit(process_downloads, row): row for row in rows_to_process}
             
             completed = 0
             total = len(rows_to_process)

@@ -31,14 +31,16 @@ df = load_data('data/processed/processed-40k.csv')
 
 
 # Define Variables as None
-time_period = None
-instrument = None
-key = None
-mode = None
-start_year = None
-end_year = None
-start_duration = None
-end_duration = None
+def clear():
+    time_period = None
+    instrument = None
+    key = None
+    mode = None
+    start_year = None
+    end_year = None
+    start_duration = None
+    end_duration = None
+clear()
 
 # Define a list of options for the dropdown
 TimePeriodList = ['none', 'baroque', 'classical', 'romantic', 'early 20th century', 'modern']
@@ -139,6 +141,10 @@ def render_results(df, page, rows_per_page=5):
             if link:
                 st.markdown(f"[Open score]({link})")
 
+cleared = st.button("Clear")
+if cleared:
+    clear()
+
 
 clicked = st.button("Click to Submit")
 if clicked:
@@ -178,7 +184,20 @@ if "results" in st.session_state:
             st.session_state.page += 1
 
 
+st.title("Or... what did you play last?")
 
+
+search_query = st.text_input("Search Titles (enter key to filter)", "")
+
+# Filter the dataframe based on the "Title" column
+if search_query:
+    # case=False makes it case-insensitive
+    # na=False prevents errors if there are empty/NaN values in the Title column
+    filtered_df = df[df["Title"].str.contains(search_query, case=False, na=False)]
+    filtered_df = filtered_df.sort_values(by='num_downloads', ascending = False)
+    st.write(filtered_df.head())
+else:
+    filtered_df = df
 
 
 

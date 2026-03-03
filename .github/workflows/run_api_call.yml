@@ -1,0 +1,44 @@
+name: Run IMSLP API and produce CSV
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 4 * * 0' # weekly on Sundays at 04:00 UTC
+
+jobs:
+  fetch-and-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Run IMSLP fetch script
+        env:
+          COUNT: 156000
+          OUTPUT_PATH: data/processed_156k.csv
+        run: |
+          python3 scripts/run_api_call.py --count ${COUNT} --output ${OUTPUT_PATH}
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-works-csv
+          path: data/processed_156k.csv
