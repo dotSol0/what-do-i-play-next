@@ -37,11 +37,12 @@ jobs:
 
       - name: Run IMSLP fetch script
         env:
-          COUNT: 156000
+          START: 38047
+          COUNT: 15000
           OUTPUT_PATH: data/processed_156k.csv
           FORCE_RESET: ${{ github.event.inputs.force_cache_reset || 'false' }}
         run: |
-          python3 scripts/run_api_call.py --count ${COUNT} --output ${OUTPUT_PATH} \
+          python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH} \
             $([ "${FORCE_RESET}" = "true" ] && echo "--force-cache-reset")
 
       - name: Upload CSV artifact

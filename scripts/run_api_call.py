@@ -17,6 +17,7 @@ from data.populate import populate_csv
 
 def main():
     parser = argparse.ArgumentParser(description="Fetch IMSLP works and populate CSV")
+    parser.add_argument("--start", type=int, default=int(os.getenv("START", "0")), help="Start offset for fetching works")
     parser.add_argument("--count", type=int, default=int(os.getenv("COUNT", "156000")), help="Number of works to fetch")
     parser.add_argument("--output", type=str, default=os.getenv("OUTPUT_PATH", "data/processed_156k.csv"), help="CSV output path")
     parser.add_argument("--batch", type=int, default=5000, help="Batch size per IMSLP request")
@@ -37,8 +38,8 @@ def main():
         except Exception as e:
             print(f"Cache reset/load failed: {e}")
 
-    print(f"Fetching up to {args.count} works (batch={args.batch})")
-    works = fetch_works(start=0, count=args.count, batch=args.batch, cache=args.use_cache)
+    print(f"Fetching up to {args.count} works starting at {args.start} (batch={args.batch})")
+    works = fetch_works(start=args.start, count=args.count, batch=args.batch, cache=args.use_cache)
     print(f"Fetched {len(works)} works")
 
     out_dir = os.path.dirname(args.output)
