@@ -79,16 +79,12 @@ def file_scrape(work: dict) -> dict:
 
 def populate_csv(works: Iterable[dict], output_path: str):
     with open(output_path, "w", newline="", encoding="utf-8") as f:
-        # ignore any unexpected keys such as stray "Year" column
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES, extrasaction="ignore")
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         writer.writeheader()
 
         for idx, work in enumerate(works, 1):
             try:
                 row = file_scrape(work)
-                # drop any accidental "Year" key that slipped in during scraping
-                if "Year" in row:
-                    row.pop("Year")
                 writer.writerow(row)
                 print(f"[{idx}] Wrote: {row.get('Title')}")
             except Exception as e:
