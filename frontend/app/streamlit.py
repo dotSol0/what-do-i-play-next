@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from ml.inference.recommend import baseline_query
+from ml.inference.predict_piece import predict_recommendations
 
 
 
@@ -136,7 +137,7 @@ def render_results(df, page, rows_per_page=5):
                 st.markdown(f"**Key:** {key}")
             if instrument:
                 st.markdown(f"**Instrument:** {instrument}")
-            if year:
+            if pd.notna(year) and year != "":
                 st.markdown(f"**Year Published:** {int(year)}")
             if link:
                 st.markdown(f"[Open score]({link})")
@@ -187,17 +188,34 @@ if "results" in st.session_state:
 st.title("Or... what did you play last?")
 
 
-search_query = st.text_input("Search Titles (enter key to filter)", "")
 
-# Filter the dataframe based on the "Title" column
-if search_query:
-    # case=False makes it case-insensitive
-    # na=False prevents errors if there are empty/NaN values in the Title column
-    filtered_df = df[df["Title"].str.contains(search_query, case=False, na=False)]
-    filtered_df = filtered_df.sort_values(by='num_downloads', ascending = False)
-    st.write(filtered_df.head())
+
+# 2. Search Box
+query = st.text_input("Search Titles (enter key to filter)", "")
+
+# 3. Filter the dataframe based on search
+filtered_df = df[df['Title'].str.contains(query, case=False)]
+
+if not filtered_df.empty:
+    # 4. Create a selection list from the filtered results
+    # We use the 'Name' for the label, but we can access the index easily
+    choice = st.selectbox(f"Showing {len(filtered_df)} results", filtered_df['Title'])
+    
+    # 5. Get the specific row for the selection
+    selected_row = filtered_df[filtered_df['Title'] == choice].iloc[0]
+    
+    # 6. Use the reference (the row data) to display the photo
+    st.divider()
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader(f"Details for: {selected_row['Title']}")
+        st.write(f"**Row ID:** {selected_row.name}") # This is the original dataframe index
+        
+    with col2:
+        recommendations = predict_recommendations(selected_row, df, top_n=10)
+        st.session_state.recommendations = recommendations
+        render_results(recommendations, 0, 5)
+
 else:
-    filtered_df = df
-
-
-
+    st.warning("No results found. Try a different search term.")

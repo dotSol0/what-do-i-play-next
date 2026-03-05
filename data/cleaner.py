@@ -109,6 +109,11 @@ def normalize_row(row: Dict[str, Any]) -> Dict[str, Any]:
     # ensure instrumentation tokens are alphabetized
     row["Instrumentation"] = alphabetize_instrumentation(row["Instrumentation"])
     row["Average Duration"] = normalize_duration(row.get("Average Duration"))
+    
+    # If Year has a value but num_downloads doesn't, move Year to num_downloads
+    if row.get("Year") and not row.get("num_downloads"):
+        row["num_downloads"] = row["Year"]
+        row["Year"] = None
 
     row = normalize_case(row)
     row = normalize_style(row)
