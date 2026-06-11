@@ -4,18 +4,24 @@ on:
   workflow_dispatch:
     inputs:
       force_cache_reset:
-        description: 'Set to true to force internal cache reset/load'
         required: false
         default: 'false'
   schedule:
-    - cron: '0 4 * * 0' # weekly on Sundays at 04:00 UTC
+    - cron: '0 */12 * * *'
 
 jobs:
   fetch-and-save:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Read current offset
+        id: offset
+        run: echo "start=$(cat state/offset.txt)" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,22 +37,24 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir -r requirements.txt
+        run: pip install --no-cache-dir -r requirements.txt
 
       - name: Run IMSLP fetch script
         env:
-          START: 119047
+          START: ${{ steps.offset.outputs.start }}
           COUNT: 20000
-          OUTPUT_PATH: data/processed_156k.csv
+          OUTPUT_PATH: data/raw-full.csv
           FORCE_RESET: ${{ github.event.inputs.force_cache_reset || 'false' }}
         run: |
           python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH} \
             $([ "${FORCE_RESET}" = "true" ] && echo "--force-cache-reset")
 
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: processed-works-csv
-          path: data/processed_156k.csv
+      - name: Advance offset and commit
+        run: |
+          NEXT=$(( $(cat state/offset.txt) + 20000 ))
+          echo $NEXT > state/offset.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/raw-full.csv state/offset.txt
+          git diff --staged --quiet || git commit -m "chore: IMSLP batch $(cat state/offset.txt)"
+          git push
