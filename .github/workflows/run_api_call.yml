@@ -39,7 +39,7 @@ jobs:
         env:
           START: ${{ steps.offset.outputs.start }}
           COUNT: 20000
-          OUTPUT_PATH: data/raw-full.csv
+          OUTPUT_PATH: data/processed/raw-full.csv
         run: |
           python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH}
 

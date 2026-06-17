@@ -19,7 +19,7 @@ def main():
     parser = argparse.ArgumentParser(description="Fetch IMSLP works and populate CSV")
     parser.add_argument("--start", type=int, default=int(os.getenv("START", "0")), help="Start offset for fetching works")
     parser.add_argument("--count", type=int, default=int(os.getenv("COUNT", "156000")), help="Number of works to fetch")
-    parser.add_argument("--output", type=str, default=os.getenv("OUTPUT_PATH", "data/processed_156k.csv"), help="CSV output path")
+    parser.add_argument("--output", type=str, default=os.getenv("OUTPUT_PATH", "data/processed/raw-full.csv"), help="CSV output path")
     parser.add_argument("--batch", type=int, default=5000, help="Batch size per IMSLP request")
     args = parser.parse_args()
 
