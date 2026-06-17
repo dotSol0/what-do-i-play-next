@@ -2,10 +2,6 @@ name: Run IMSLP API and produce CSV
 
 on:
   workflow_dispatch:
-    inputs:
-      force_cache_reset:
-        required: false
-        default: 'false'
   schedule:
     - cron: '0 */12 * * *'
 
@@ -44,10 +40,8 @@ jobs:
           START: ${{ steps.offset.outputs.start }}
           COUNT: 20000
           OUTPUT_PATH: data/raw-full.csv
-          FORCE_RESET: ${{ github.event.inputs.force_cache_reset || 'false' }}
         run: |
-          python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH} \
-            $([ "${FORCE_RESET}" = "true" ] && echo "--force-cache-reset")
+          python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH}
 
       - name: Advance offset and commit
         run: |
