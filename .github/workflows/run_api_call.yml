@@ -49,6 +49,6 @@ jobs:
           echo $NEXT > state/offset.txt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/raw-full.csv state/offset.txt
+          git add data/processed/raw-full.csv state/offset.txt
           git diff --staged --quiet || git commit -m "chore: IMSLP batch $(cat state/offset.txt)"
           git push
