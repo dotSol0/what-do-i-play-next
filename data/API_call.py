@@ -9,6 +9,7 @@ from adding_downloads import process_downloads
 
 
 works = internal.list_works(count=10)
+print(f"API returned {len(works)} works")
 
 
 import csv

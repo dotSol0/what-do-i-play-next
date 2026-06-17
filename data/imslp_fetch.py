@@ -2,7 +2,7 @@ import time
 from imslp.interfaces import internal
 
 
-def fetch_works(start: int = 0, count: int | None = None, batch: int = 5000, cache: bool = False):
+def fetch_works(start: int = 0, count: int | None = None, batch: int = 5000, cache: bool = True):
     """Fetch works from IMSLP in safe chunks.
 
     - start: offset to begin fetching
@@ -22,6 +22,7 @@ def fetch_works(start: int = 0, count: int | None = None, batch: int = 5000, cac
             break
 
         chunk = internal.list_works(start=cur, count=to_get, cache=cache)
+        print(f"start={cur} count={to_get} returned {len(list(chunk))} results")
 
         # Ensure we have a concrete list
         try:

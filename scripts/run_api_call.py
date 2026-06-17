@@ -21,25 +21,19 @@ def main():
     parser.add_argument("--count", type=int, default=int(os.getenv("COUNT", "156000")), help="Number of works to fetch")
     parser.add_argument("--output", type=str, default=os.getenv("OUTPUT_PATH", "data/processed_156k.csv"), help="CSV output path")
     parser.add_argument("--batch", type=int, default=5000, help="Batch size per IMSLP request")
-    parser.add_argument("--use-cache", action="store_true", help="Use internal cache when listing works")
-    parser.add_argument("--force-cache-reset", action="store_true", help="Force reset/load of internal cache even in CI")
     args = parser.parse_args()
 
     # Avoid resetting/loading the internal cache when running in GitHub Actions by default.
     # This prevents failures when cache files are not present in the runner environment.
-    ci_mode = os.getenv("GITHUB_ACTIONS") == "true"
-    if ci_mode and not args.force_cache_reset:
-        print("Detected GitHub Actions CI environment — skipping internal.reset_cache/load. Use --force-cache-reset to override.")
-    else:
-        print(f"Resetting/loading internal cache (from_file=True) to match notebook behaviour")
-        try:
-            internal.reset_cache(from_file=True)
-            internal.load_cache(from_file=True)
-        except Exception as e:
-            print(f"Cache reset/load failed: {e}")
-
+    print("Loading IMSLP cache via API crawl...")
+    try:
+        internal.reset_cache(from_file=False)
+        internal.load_cache(from_file=False)
+    except Exception as e:
+        print(f"Cache load failed: {e}")
+        sys.exit(1)
     print(f"Fetching up to {args.count} works starting at {args.start} (batch={args.batch})")
-    works = fetch_works(start=args.start, count=args.count, batch=args.batch, cache=args.use_cache)
+    works = fetch_works(start=args.start, count=args.count, batch=args.batch, cache=True)
     print(f"Fetched {len(works)} works")
 
     out_dir = os.path.dirname(args.output)

@@ -27,7 +27,7 @@ def normalize_instrumentation(value: Any) -> List[str]:
         if inst:
             instruments.append(inst)
 
-    return sorted(set(instruments))
+    return sorted(instruments)  # removes set() — keeps duplicates
 
 
 def alphabetize_instrumentation(value: Any) -> List[str]:
@@ -54,7 +54,7 @@ def alphabetize_instrumentation(value: Any) -> List[str]:
             cleaned.append(t2)
 
     # deduplicate while preserving alphabetical order
-    unique = sorted(set(cleaned), key=lambda s: s.lower())
+    unique = sorted(cleaned)
     return unique
 
 
