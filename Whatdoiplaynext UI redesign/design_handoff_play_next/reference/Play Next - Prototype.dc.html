@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#e7e0d1; --paper:#f8f4ea; --paper2:#efe8d8;
+    --ink:#1c1710; --ink2:#453d2f; --muted:#786f5b; --faint:#a99f86;
+    --line:rgba(28,23,16,.12); --line2:rgba(28,23,16,.06);
+    --wine:#7a2733; --wine-d:#611c27; --wine-soft:rgba(122,39,51,.09);
+    --brass:#a97b33; --brass-d:#835e22;
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --serif:'Spectral',Georgia,serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .app{min-height:100vh;display:flex;flex-direction:column}
+  .topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:22px;padding:14px 34px;background:var(--wine);color:#f5e9df;border-bottom:1px solid rgba(0,0,0,.15)}
+  .brand{font:600 17px var(--serif);letter-spacing:.01em;display:flex;align-items:center;gap:10px;cursor:pointer;color:#f8efe6}
+  .logo{width:26px;height:26px;border-radius:6px;background:#f8efe6;color:var(--wine);display:grid;place-items:center;font:600 14px var(--serif)}
+  .nav{display:flex;gap:6px;margin-left:8px}
+  .navlink{font:500 13px var(--sans);color:rgba(248,239,230,.72);padding:6px 13px;border-radius:8px;cursor:pointer}
+  .navlink.on{background:rgba(255,255,255,.14);color:#fff}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--brass);color:#fff;display:grid;place-items:center;font:600 12px var(--sans);margin-left:auto}
+
+  .kbd{font:500 10.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:2px 6px;background:var(--paper)}
+  .chip{font:500 12px var(--sans);padding:6px 13px;border-radius:20px;border:1px solid var(--line);color:var(--ink2);background:var(--paper);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+  .chip.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+  .chip .x{opacity:.7;font-size:13px;line-height:1}
+  .era{font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:4px;white-space:nowrap}
+  .era.b{background:rgba(169,123,51,.18);color:var(--brass-d)}
+  .era.c{background:rgba(60,90,105,.16);color:#2f4a58}
+  .era.r{background:rgba(122,39,51,.14);color:var(--wine)}
+  .btn{font:600 12.5px var(--sans);padding:10px 16px;border-radius:9px;background:var(--wine);color:#fff;border:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;text-decoration:none}
+  .btn:hover{background:var(--wine-d)}
+  .btn.ghost{background:transparent;color:var(--wine);border:1px solid rgba(122,39,51,.4)}
+  .btn.ghost:hover{background:var(--wine-soft)}
+  .simbtn{font:600 11.5px var(--sans);color:var(--wine);border:1px solid rgba(122,39,51,.38);background:var(--wine-soft);border-radius:8px;padding:8px 11px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;cursor:pointer}
+  .simbtn:hover{background:rgba(122,39,51,.15)}
+  .a-row:hover{background:var(--wine-soft)}
+  .field{border:1px solid var(--line);border-radius:9px;background:var(--paper);display:flex;align-items:center;padding:0 12px;font:400 12.5px var(--sans);color:var(--faint)}
+  .seg{font:500 11.5px var(--sans);color:var(--muted);padding:5px 12px;border-radius:6px;cursor:pointer}
+  .seg.on{background:var(--wine);color:#fff}
+  .likecard:hover{border-color:rgba(122,39,51,.35)}
+</style>
+</helmet>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand" onClick="{{ goStart }}"><span class="logo">♪</span>What Do I Play Next</div>
+    <div class="nav">
+      <span class="navlink {{ navIndexCls }}" onClick="{{ goIndex }}">Browse</span>
+      <span class="navlink {{ navRecCls }}" onClick="{{ goRecommendDefault }}">Play Next</span>
+    </div>
+    <span class="avatar">MR</span>
+  </div>
+
+  <!-- ═══════════ START ═══════════ -->
+  <sc-if value="{{ isStart }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:70px 32px 60px">
+      <div style="width:100%;max-width:720px;text-align:center">
+        <p style="font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--brass-d);margin:0 0 12px">A student's guide to public-domain repertoire</p>
+        <h1 style="font:400 42px/1.12 var(--serif);margin:0 0 14px;color:var(--ink)">Repertoire worth your practice hours.</h1>
+        <p style="font:400 14px/1.6 var(--sans);color:var(--muted);max-width:460px;margin:0 auto 30px">Search 12,480 curated, freely-playable scores — or tell us what you played last and we'll find its neighbours.</p>
+
+        <div class="field" onClick="{{ goIndex }}" style="height:56px;border:1.5px solid var(--wine);border-radius:13px;cursor:text;box-shadow:0 6px 22px -12px rgba(122,39,51,.55);color:var(--muted);font-size:14.5px">
+          <span style="color:var(--wine);font-size:18px;margin-right:11px">⌕</span>Search by title, composer, instrument, key…
+          <span class="kbd" style="margin-left:auto">/</span>
+        </div>
+
+        <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+          <span style="font:400 12.5px var(--sans);color:var(--muted);align-self:center">Browse an era:</span>
+          <span class="chip" onClick="{{ goIndex }}">Baroque</span>
+          <span class="chip" onClick="{{ goIndex }}">Classical</span>
+          <span class="chip" onClick="{{ goIndex }}">Romantic</span>
+        </div>
+      </div>
+
+      <div style="width:100%;max-width:1000px;margin-top:30px;border-top:1px solid var(--line);padding-top:20px">
+        <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:12px;text-align:left">
+          <span style="font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Pick up where you left off</span>
+          <span style="font:400 12px var(--sans);color:var(--muted)">— what did you play last?</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left">
+          <sc-for list="{{ recent }}" as="p" hint-placeholder-count="3">
+            <div onClick="{{ p.onPlayed }}" style="display:flex;align-items:center;gap:11px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--paper);cursor:pointer">
+              <span style="font-size:14px;color:var(--brass)">↻</span>
+              <div style="flex:1;min-width:0">
+                <div style="font:500 13px/1.2 var(--serif);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.t }}</div>
+                <div style="font:400 11px var(--sans);color:var(--muted)">{{ p.c }}</div>
+              </div>
+              <span style="font:600 12px var(--sans);color:var(--wine);white-space:nowrap">Similar →</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="width:100%;max-width:1000px;margin-top:54px">
+        <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:24px">
+          <span style="font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px">Jump back in</span>
+          <sc-for list="{{ history }}" as="q" hint-placeholder-count="4">
+            <span class="chip" onClick="{{ goIndex }}"><span style="color:var(--faint);margin-right:1px">⌕</span>{{ q }}</span>
+          </sc-for>
+          <span style="font:500 11.5px var(--sans);color:var(--wine);cursor:pointer;margin-left:4px">Clear history</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;text-align:left">
+          <h2 style="font:500 20px var(--serif);margin:0;color:var(--ink)">Because you've been exploring <em>solo cello</em></h2>
+          <span style="font:400 12px var(--mono);color:var(--muted)">— you may like</span>
+          <div style="margin-left:auto;display:flex;gap:3px;background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:3px">
+            <span class="seg on">For you</span><span class="seg">Popular</span><span class="seg">New additions</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:left">
+          <sc-for list="{{ likeCards }}" as="m" hint-placeholder-count="4">
+            <div class="likecard" style="border:1px solid var(--line);border-radius:11px;background:var(--paper);padding:16px;display:flex;flex-direction:column;gap:11px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span class="{{ m.eraCls }}">{{ m.eraLbl }}</span>
+                <span style="font:600 12px var(--mono);color:var(--brass-d)">{{ m.score }} match</span>
+              </div>
+              <div>
+                <div style="font:500 15px/1.25 var(--serif);color:var(--ink);margin-bottom:3px">{{ m.t }}</div>
+                <div style="font:400 11px var(--sans);color:var(--muted)">{{ m.c }} · {{ m.instShort }}</div>
+              </div>
+              <div style="display:flex;gap:7px;align-items:flex-start;font:400 11px/1.35 var(--sans);color:var(--ink2);flex:1"><span style="color:var(--brass);font-size:11px">✦</span>{{ m.reason1 }}</div>
+              <div style="display:flex;gap:8px">
+                <a class="btn" href="{{ m.permalink }}" target="_blank" rel="noopener" style="flex:1;justify-content:center;padding:8px 10px;font-size:11.5px">View ↗</a>
+                <span class="simbtn" onClick="{{ m.onSimilar }}" style="padding:8px 10px">≈</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin:40px 0 18px;flex-wrap:wrap;text-align:left">
+          <h2 style="font:500 20px var(--serif);margin:0;color:var(--ink)">New to the library? Start here</h2>
+          <span style="font:400 12px var(--mono);color:var(--muted)">— editor's picks</span>
+          <span style="margin-left:auto;font:600 12px var(--sans);color:var(--wine);cursor:pointer" onClick="{{ goIndex }}">Browse all 12,480 →</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:left">
+          <sc-for list="{{ starters }}" as="p" hint-placeholder-count="4">
+            <div class="likecard" style="border:1px solid var(--line);border-radius:11px;background:var(--paper);padding:16px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span class="{{ p.eraCls }}">{{ p.eraLbl }}</span>
+                <span style="font:400 11px var(--mono);color:var(--faint)">↓ {{ p.dl }}</span>
+              </div>
+              <div>
+                <div style="font:500 15px/1.25 var(--serif);color:var(--ink);margin-bottom:3px">{{ p.t }}</div>
+                <div style="font:400 11px var(--sans);color:var(--muted)">{{ p.c }} · {{ p.instShort }}</div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:2px">
+                <a class="btn" href="{{ p.permalink }}" target="_blank" rel="noopener" style="flex:1;justify-content:center;padding:8px 10px;font-size:11.5px">View ↗</a>
+                <span class="simbtn" onClick="{{ p.onSimilar }}" style="padding:8px 10px">≈</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ═══════════ INDEX ═══════════ -->
+  <sc-if value="{{ isIndex }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:18px;padding:18px 34px;border-bottom:1px solid var(--line);background:var(--paper)">
+        <div class="field" style="flex:1;max-width:620px;height:44px;color:var(--ink);font-weight:500">
+          <span style="color:var(--wine);font-size:16px;margin-right:10px">⌕</span>sarabande<span style="width:1.5px;height:18px;background:var(--wine);margin-left:1px"></span>
+          <span style="margin-left:auto;font:400 12px var(--mono);color:var(--faint)">3,102 results</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:236px 1fr">
+        <div style="border-right:1px solid var(--line);padding:22px 20px;background:var(--paper2)">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px"><span style="font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Filters</span><span style="font:500 11.5px var(--sans);color:var(--wine);cursor:pointer">Clear</span></div>
+          <div style="margin-bottom:20px">
+            <div style="font:600 12.5px var(--sans);color:var(--ink);margin-bottom:10px">Era</div>
+            <div style="display:flex;flex-direction:column;gap:9px;font:400 12.5px var(--sans);color:var(--ink2)">
+              <label style="display:flex;gap:9px;align-items:center;cursor:pointer"><span style="width:16px;height:16px;border-radius:4px;background:var(--wine);display:grid;place-items:center;color:#fff;font-size:10px">✓</span>Baroque <span style="margin-left:auto;color:var(--faint);font:400 11px var(--mono)">3,102</span></label>
+              <label style="display:flex;gap:9px;align-items:center;cursor:pointer"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line)"></span>Classical <span style="margin-left:auto;color:var(--faint);font:400 11px var(--mono)">4,417</span></label>
+              <label style="display:flex;gap:9px;align-items:center;cursor:pointer"><span style="width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line)"></span>Romantic <span style="margin-left:auto;color:var(--faint);font:400 11px var(--mono)">4,961</span></label>
+            </div>
+          </div>
+          <div style="margin-bottom:20px">
+            <div style="font:600 12.5px var(--sans);color:var(--ink);margin-bottom:10px">Instrument</div>
+            <div class="field" style="height:36px">Piano, cello…</div>
+          </div>
+          <div style="margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;font:600 12.5px var(--sans);color:var(--ink);margin-bottom:14px">Duration <span style="font:400 11px var(--mono);color:var(--muted)">0–30m</span></div>
+            <div style="height:4px;border-radius:2px;background:var(--line);position:relative"><span style="position:absolute;left:12%;right:34%;top:0;bottom:0;background:var(--wine);border-radius:2px"></span><span style="position:absolute;left:12%;top:-5px;width:13px;height:13px;border-radius:50%;background:var(--paper);border:2px solid var(--wine)"></span><span style="position:absolute;right:34%;top:-5px;width:13px;height:13px;border-radius:50%;background:var(--paper);border:2px solid var(--wine)"></span></div>
+          </div>
+          <div>
+            <div style="font:600 12.5px var(--sans);color:var(--ink);margin-bottom:10px">Key</div>
+            <div class="field" style="height:36px">Any key</div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 26px;border-bottom:1px solid var(--line)">
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span style="font:400 12.5px var(--sans);color:var(--muted)">Showing</span><span class="chip on" style="padding:4px 11px">Baroque <span class="x">×</span></span></div>
+            <div style="display:flex;align-items:center;gap:9px;font:400 12px var(--sans);color:var(--muted)">Sort <b style="color:var(--ink);font-weight:600">Most downloaded ▾</b></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 132px 88px 68px 220px;gap:14px;padding:10px 26px;border-bottom:1px solid var(--line);font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint)">
+            <span>Piece</span><span>Instrumentation</span><span>Key</span><span>Length</span><span></span>
+          </div>
+          <sc-for list="{{ rows }}" as="p" hint-placeholder-count="6">
+            <div class="a-row" style="display:grid;grid-template-columns:1fr 132px 88px 68px 220px;gap:14px;padding:15px 26px;align-items:center;border-bottom:1px solid var(--line2)">
+              <div>
+                <div style="font:500 14.5px var(--serif);color:var(--ink);margin-bottom:3px">{{ p.t }}</div>
+                <div style="display:flex;gap:9px;align-items:center">
+                  <span class="{{ p.eraCls }}">{{ p.eraLbl }}</span>
+                  <span style="font:400 11.5px var(--sans);color:var(--muted)">{{ p.c }}</span>
+                  <span style="font:400 11px var(--mono);color:var(--faint)">↓ {{ p.dl }}</span>
+                </div>
+              </div>
+              <span style="font:400 12px var(--sans);color:var(--ink2)">{{ p.inst }}</span>
+              <span style="font:400 12px var(--mono);color:var(--ink2)">{{ p.key }}</span>
+              <span style="font:400 12px var(--mono);color:var(--ink2)">{{ p.dur }}</span>
+              <div style="display:flex;gap:9px;align-items:center;justify-content:flex-end">
+                <span class="simbtn" onClick="{{ p.onSimilar }}">≈ Similar</span>
+                <a class="btn" href="{{ p.permalink }}" target="_blank" rel="noopener">View on IMSLP ↗</a>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ═══════════ PLAY NEXT ═══════════ -->
+  <sc-if value="{{ isRecommend }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1">
+      <div style="padding:34px 44px 26px;background:linear-gradient(180deg,var(--paper2),var(--paper));border-bottom:1px solid var(--line)">
+        <div style="max-width:680px">
+          <p style="font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--brass-d);margin:0 0 8px">Find your next piece</p>
+          <h1 style="font:500 30px/1.2 var(--serif);margin:0 0 18px;color:var(--ink)">What did you play last?</h1>
+          <div style="min-height:52px;border:1.5px solid var(--wine);border-radius:12px;background:var(--paper);display:flex;align-items:center;gap:11px;padding:7px 8px 7px 15px;box-shadow:0 5px 20px -12px rgba(122,39,51,.55);flex-wrap:wrap">
+            <span style="color:var(--wine);font-size:17px">⌕</span>
+            <span class="chip on" style="padding:5px 11px 5px 12px">{{ seedShort }} <span class="x">×</span></span>
+            <span style="font:400 12.5px var(--sans);color:var(--faint)">add another…</span>
+            <button class="btn" style="margin-left:auto">Show me similar →</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap"><span style="font:400 12px var(--sans);color:var(--muted)">Prioritize:</span><span class="chip on" style="padding:5px 11px">Same instrument</span><span class="chip" style="padding:5px 11px">Same era</span><span class="chip" style="padding:5px 11px">Similar length</span></div>
+        </div>
+      </div>
+      <div style="padding:26px 44px 46px">
+        <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:20px;flex-wrap:wrap"><h2 style="font:500 18px var(--serif);margin:0;color:var(--ink)">Because you played <em>{{ seedTitle }}</em></h2><span style="font:400 12px var(--mono);color:var(--muted)">— {{ matchCount }} close matches</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+          <sc-for list="{{ matches }}" as="m" hint-placeholder-count="6">
+            <div style="border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:18px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+                <span class="{{ m.eraCls }}">{{ m.eraLbl }}</span>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+                  <div style="font:600 20px var(--mono);color:var(--brass-d);line-height:1">{{ m.score }}</div>
+                  <div style="font:500 8.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)">match</div>
+                </div>
+              </div>
+              <div>
+                <div style="font:500 15.5px/1.25 var(--serif);color:var(--ink);margin-bottom:4px">{{ m.t }}</div>
+                <div style="font:400 11.5px var(--sans);color:var(--muted)">{{ m.c }} · {{ m.instShort }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px;flex:1">
+                <sc-for list="{{ m.reasons }}" as="r" hint-placeholder-count="2">
+                  <div style="display:flex;gap:8px;align-items:flex-start;font:400 11.5px/1.35 var(--sans);color:var(--ink2)"><span style="color:var(--brass);font-size:12px;line-height:1.2">✦</span>{{ r }}</div>
+                </sc-for>
+              </div>
+              <div style="display:flex;gap:9px;margin-top:2px">
+                <a class="btn" href="{{ m.permalink }}" target="_blank" rel="noopener" style="flex:1;justify-content:center">View on IMSLP ↗</a>
+                <span class="simbtn" onClick="{{ m.onSimilar }}">≈</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { screen: 'start', seedId: 0 };
+
+  go(screen) { this.setState({ screen }); window.scrollTo(0, 0); }
+  recommend(id) { this.setState({ screen: 'recommend', seedId: id }); window.scrollTo(0, 0); }
+
+  catalog() {
+    return [
+      { id: 0, t: 'Cello Suite No.1 in G, BWV 1007', c: 'Bach, J.S.', inst: 'cello', key: 'G major', era: 'baroque', dur: '18 min', dl: '41,208', form: 'suite', url: 'https://imslp.org/wiki/Cello_Suite_No.1,_BWV_1007_(Bach,_Johann_Sebastian)' },
+      { id: 1, t: 'Cello Suite No.2 in D minor, BWV 1008', c: 'Bach, J.S.', inst: 'cello', key: 'D minor', era: 'baroque', dur: '20 min', dl: '30,551', form: 'suite', url: 'https://imslp.org/wiki/Cello_Suite_No.2,_BWV_1008_(Bach,_Johann_Sebastian)' },
+      { id: 2, t: 'Violin Partita No.2, BWV 1004', c: 'Bach, J.S.', inst: 'violin', key: 'D minor', era: 'baroque', dur: '31 min', dl: '33,540', form: 'suite', url: 'https://imslp.org/wiki/Violin_Partita_No.2,_BWV_1004_(Bach,_Johann_Sebastian)' },
+      { id: 3, t: 'Ricercari for Solo Cello', c: 'Gabrielli, Domenico', inst: 'cello', key: 'various', era: 'baroque', dur: '22 min', dl: '3,902', form: 'suite', url: 'https://imslp.org/wiki/7_Ricercari_(Gabrielli,_Domenico)' },
+      { id: 4, t: 'Sonata for Solo Cello, Op.8', c: 'Kodály, Zoltán', inst: 'cello', key: 'B minor', era: 'romantic', dur: '28 min', dl: '9,114', form: 'sonata', url: 'https://imslp.org/wiki/Cello_Sonata,_Op.8_(Kod%C3%A1ly,_Zolt%C3%A1n)' },
+      { id: 5, t: 'Suite for Solo Cello No.3', c: 'Reger, Max', inst: 'cello', key: 'C major', era: 'romantic', dur: '15 min', dl: '2,340', form: 'suite', url: 'https://imslp.org/wiki/3_Suites,_Op.131c_(Reger,_Max)' },
+      { id: 6, t: '34 Keyboard Sonatinas', c: 'Benda, Georg', inst: 'piano or clavichord', key: 'various', era: 'classical', dur: '—', dl: '25,367', form: 'sonatina', url: 'https://imslp.org/wiki/34_Keyboard_Sonatinas_(Benda,_Georg)' },
+      { id: 7, t: 'Nocturne in E♭, Op.9 No.2', c: 'Chopin, Frédéric', inst: 'piano', key: 'E♭ major', era: 'romantic', dur: '4 min', dl: '58,902', form: 'character', url: 'https://imslp.org/wiki/Nocturnes,_Op.9_(Chopin,_Fr%C3%A9d%C3%A9ric)' },
+      { id: 8, t: 'Gymnopédie No.1', c: 'Satie, Erik', inst: 'piano', key: 'D major', era: 'romantic', dur: '3 min', dl: '64,771', form: 'character', url: 'https://imslp.org/wiki/Gymnop%C3%A9dies_(Satie,_Erik)' },
+      { id: 9, t: '34 Mazurkas', c: 'Wolff, Édouard', inst: 'piano', key: 'various', era: 'romantic', dur: '—', dl: '72', form: 'character', url: 'https://imslp.org/wiki/34_Mazurkas_(Wolff,_%C3%89douard)' },
+      { id: 10, t: 'Prelude & Fugue in C, BWV 846', c: 'Bach, J.S.', inst: 'piano', key: 'C major', era: 'baroque', dur: '5 min', dl: '48,110', form: 'prelude', url: 'https://imslp.org/wiki/Das_wohltemperierte_Klavier_I,_BWV_846-869_(Bach,_Johann_Sebastian)' },
+      { id: 11, t: 'Songs Without Words, Op.19b', c: 'Mendelssohn, Felix', inst: 'piano', key: 'various', era: 'romantic', dur: '20 min', dl: '21,400', form: 'character', url: 'https://imslp.org/wiki/Lieder_ohne_Worte,_Op.19b_(Mendelssohn,_Felix)' },
+    ];
+  }
+
+  render_enrich(p) {
+    const cls = { baroque: 'era b', classical: 'era c', romantic: 'era r' };
+    const lbl = { baroque: 'Baroque', classical: 'Classical', romantic: 'Romantic' };
+    return { ...p, permalink: p.url, eraCls: cls[p.era], eraLbl: lbl[p.era], instShort: p.inst.length > 16 ? p.inst.slice(0, 16) + '…' : p.inst };
+  }
+
+  base(s) { return (s || '').split(' ')[0].toLowerCase(); }
+
+  computeMatches(seed) {
+    const lbl = { baroque: 'Baroque', classical: 'Classical', romantic: 'Romantic' };
+    const scored = this.catalog().filter(p => p.id !== seed.id).map(p => {
+      let s = 46; const reasons = [];
+      if (p.c === seed.c) { s += 26; reasons.push('Same composer — ' + seed.c.split(',')[0]); }
+      if (this.base(p.inst) === this.base(seed.inst)) { s += 24; reasons.push('Written for ' + this.base(seed.inst)); }
+      if (p.era === seed.era) { s += 14; reasons.push('Same era (' + lbl[seed.era] + ')'); }
+      if (p.form === seed.form) { s += 12; reasons.push('Same form — ' + seed.form); }
+      if (reasons.length === 0) reasons.push('Neighbouring catalog vector');
+      return { ...this.render_enrich(p), score: Math.min(99, s) + '%', _s: s, reasons: reasons.slice(0, 2) };
+    });
+    scored.sort((a, b) => b._s - a._s);
+    return scored.slice(0, 6);
+  }
+
+  renderVals() {
+    const cat = this.catalog();
+    const seed = cat[this.state.seedId] || cat[0];
+    const screen = this.state.screen;
+
+    const rows = [0, 1, 2, 3, 10, 5].map(i => {
+      const e = this.render_enrich(cat[i]);
+      e.onSimilar = () => this.recommend(cat[i].id);
+      return e;
+    });
+
+    const recent = [0, 8, 7].map(i => {
+      const e = this.render_enrich(cat[i]);
+      e.onPlayed = () => this.recommend(cat[i].id);
+      return e;
+    });
+
+    const matches = this.computeMatches(seed).map(m => {
+      m.onSimilar = () => this.recommend(cat.find(c => c.t === m.t).id);
+      return m;
+    });
+
+    const likeCards = this.computeMatches(cat[0]).slice(0, 4).map(m => {
+      m.onSimilar = () => this.recommend(cat.find(c => c.t === m.t).id);
+      m.reason1 = m.reasons[0];
+      return m;
+    });
+
+    const history = ['sarabande', 'solo cello', 'easy piano', 'D minor', 'Bach suites'];
+
+    const starters = [8, 7, 10, 6].map(i => {
+      const e = this.render_enrich(cat[i]);
+      e.onSimilar = () => this.recommend(cat[i].id);
+      return e;
+    });
+
+    return {
+      isStart: screen === 'start',
+      isIndex: screen === 'index',
+      isRecommend: screen === 'recommend',
+      navIndexCls: screen === 'index' ? 'on' : '',
+      navRecCls: screen === 'recommend' ? 'on' : '',
+      goStart: () => this.go('start'),
+      goIndex: () => this.go('index'),
+      goRecommendDefault: () => this.recommend(0),
+      rows, recent, matches, likeCards, history, starters,
+      seedTitle: seed.t.replace(/,.*$/, ''),
+      seedShort: seed.c.split(',')[0] + ' — ' + seed.t.replace(/,.*$/, ''),
+      matchCount: matches.length,
+    };
+  }
+}
+</script>
+</body>
+</html>
