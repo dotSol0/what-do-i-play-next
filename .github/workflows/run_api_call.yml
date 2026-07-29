@@ -41,7 +41,7 @@ jobs:
           COUNT: 20000
           OUTPUT_PATH: data/processed/raw-full.csv
         run: |
-          python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH}
+          python3 scripts/run_api_call.py --start ${START} --count ${COUNT} --output ${OUTPUT_PATH} --append
 
       - name: Advance offset and commit
         run: |

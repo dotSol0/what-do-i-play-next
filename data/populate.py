@@ -1,4 +1,5 @@
 import csv
+import os
 import time
 from typing import Iterable
 from urllib.parse import urljoin
@@ -77,21 +78,36 @@ def file_scrape(work: dict) -> dict:
     return row
 
 
-def populate_csv(works: Iterable[dict], output_path: str):
-    with open(output_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        writer.writeheader()
+def populate_csv(works: Iterable[dict], output_path: str, append: bool = False) -> int:
+    """Write `works` to `output_path` as CSV. Returns the number of rows written.
+
+    When `append` is True, rows are added to an existing file (writing the
+    header only if the file doesn't already exist or is empty) instead of
+    truncating it — used by the scheduled CI pipeline, which accumulates
+    batches across runs.
+    """
+    skip_header = append and os.path.exists(output_path) and os.path.getsize(output_path) > 0
+    mode = "a" if append else "w"
+    written = 0
+
+    with open(output_path, mode, newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES, extrasaction="ignore")
+        if not skip_header:
+            writer.writeheader()
 
         for idx, work in enumerate(works, 1):
             try:
                 row = file_scrape(work)
                 writer.writerow(row)
+                written += 1
                 print(f"[{idx}] Wrote: {row.get('Title')}")
             except Exception as e:
                 print(f"[{idx}] Failed row: {e}")
 
             # rate limiting safety
             time.sleep(0.01)
+
+    return written
 
 
 if __name__ == "__main__":

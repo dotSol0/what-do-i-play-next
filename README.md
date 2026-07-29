@@ -12,7 +12,6 @@ instrumentation, era, key, and popularity.
 
 ### Coming Soon...
 - A solo tag that will give you all pieces in the base that has that instrument + piano accompaniment
-- A backfilled recommender: Type in the last piece you've played, and you will be given pieces similar to it! Plus, you'll be given pieces more difficult than it
 - A user rating system: Rate the quality of the musical selections! Would you recommend it to other musicians?
 - Light/dark mode
 
