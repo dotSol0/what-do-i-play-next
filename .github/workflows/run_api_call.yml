@@ -1,9 +1,13 @@
-name: Run IMSLP API and produce CSV
+name: IMSLP Batch Fetch v2
 
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 */12 * * *'
+
+concurrency:
+  group: imslp-fetch-and-save
+  cancel-in-progress: false
 
 jobs:
   fetch-and-save:
