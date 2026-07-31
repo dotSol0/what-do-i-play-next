@@ -75,7 +75,7 @@ key = st.multiselect(
     Key                    # The list of options
 )
 
-mode = st.segmented_control('Major or minor?' , ["All", "major", "minor"])
+mode = st.segmented_control('Major or minor?' , ["All", "major", "minor"], default="All")
 
 
 year_range = range(1500, 2026 + 1)
@@ -88,7 +88,7 @@ start_year, end_year = st.select_slider(
 )
 
 
-duration_selection = st.segmented_control('' , ["Year", "Range"])
+duration_selection = st.segmented_control('' , ["Year", "Range"], default="Year")
 duration_range = range(1, 120 + 1)
 duration_list = list(duration_range)
 
@@ -129,6 +129,7 @@ def render_results(df, page, rows_per_page=5):
             instrument = row.get("Instrumentation") or ""
             year = row.get("Year") or row.get("Year Published") or ""
             link = row.get("Permlink") or row.get("Hyperlink") or ""
+            downloads = row.get("num_downloads")
 
             st.subheader(title)
             if composer:
@@ -139,6 +140,8 @@ def render_results(df, page, rows_per_page=5):
                 st.markdown(f"**Instrument:** {instrument}")
             if pd.notna(year) and year != "":
                 st.markdown(f"**Year Published:** {int(year)}")
+            if pd.notna(downloads) and downloads != "":
+                st.caption(f"{int(downloads):,} downloads")
             if link:
                 st.markdown(f"[Open score]({link})")
 
