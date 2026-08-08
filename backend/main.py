@@ -6,12 +6,22 @@ from ml.inference.predict_piece import predict_recommendations
 import pandas as pd
 import numpy as np
 
+from fastapi.middleware.cors import CORSMiddleware
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.df = pd.read_csv("data/processed/processed-full.csv")
     yield
     #anything after yield runs on shutdown
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class RecommendRequest(BaseModel):
       time_period: str | None = None
