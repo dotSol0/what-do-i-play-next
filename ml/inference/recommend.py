@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pydantic
 
 def time_period_filter(time_period, df):
     if not time_period:
@@ -137,3 +138,33 @@ def baseline_query(query, df):
     sorted_df = df_filtered.sort_values(by='num_downloads', ascending = False)
     return sorted_df
 
+def officialbaseline_query(query, df):
+    """Like `baseline_query`, but takes an object with named attributes
+    (e.g. a FastAPI `RecommendRequest`) instead of a positional list."""
+    if not isinstance(df, pd.DataFrame):
+        try:
+            df = pd.DataFrame(df)
+        except Exception:
+            raise TypeError("Error with dataset: " \
+            "`df` must be a pandas DataFrame or convertible to one")
+
+    df_filtered = df.copy()
+    # Only apply filters when the query attribute is truthy (non-empty list/None)
+    if query.instruments:
+        df_filtered = instrumentation_query(query.instruments, df_filtered)
+    if query.start_duration is not None:
+        if query.end_duration is not None:
+            df_filtered = duration_range_query(query.start_duration, query.end_duration, df_filtered)
+        else:
+            df_filtered = duration_query(query.start_duration, df_filtered)
+    if query.keys:
+        df_filtered = key_query(query.keys, df_filtered)
+    if query.mode and query.mode != "All":
+        df_filtered = mode_query(query.mode, df_filtered)
+    if query.start_year is not None:
+        df_filtered = year_query(query.start_year, query.end_year, df_filtered)
+    if query.time_period:
+        df_filtered = time_period_filter(query.time_period, df_filtered)
+
+    sorted_df = df_filtered.sort_values(by='num_downloads', ascending = False)
+    return sorted_df
